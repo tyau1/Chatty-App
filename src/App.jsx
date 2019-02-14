@@ -23,29 +23,36 @@ export default class App extends Component {
         nextMsg: ''
       };
     this.handleChange = this.handleChange.bind(this);
-    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.handleEnterPress = this.handleEnterPress.bind(this);
   }
 
   handleChange(event) {
-    // const newMsg = this.state.messages
     const nextMsg = event.target.value;
     this.setState({ nextMsg });
   }
 
-  handleKeyPress(event) {
+  handleEnterPress(event) {
     const keyPressed = event.key;
     if (keyPressed === 'Enter') {
+      const newMsg = {
+        id: Math.random(),
+        username: this.state.currentUser.name,
+        content: this.state.nextMsg,
+      }
       this.setState({
-        messages: this.state.messages.concat({
-          id: Math.random(),
-          username: this.state.currentUser.name,
-          content: this.state.nextMsg,
-        })
-      })
+        messages: this.state.messages.concat([newMsg])
+      });
+      const strMsg = JSON.stringify(newMsg);
+      this.wss.send(strMsg);
     }
   }
 
   componentDidMount() {
+    this.wss = new WebSocket('ws://0.0.0.0:3001/')
+    this.wss.onopen = function (event) {
+      console.log('Connected to server');
+    }
+
     console.log('componentDidMount <App />');
     setTimeout(() => {
       console.log('Simulating incoming message');
@@ -69,7 +76,7 @@ export default class App extends Component {
           <ChatBar
             username={this.state.currentUser.name}
             handleChange={this.handleChange}
-            handleKeyPress={this.handleKeyPress}
+            handleEnterPress={this.handleEnterPress}
           />
         </div>
 
