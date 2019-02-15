@@ -72,6 +72,7 @@ export default class App extends Component {
     this.wss.onopen = function (event) {
       console.log('Connected to server');
     }
+
     this.wss.onmessage = (event) => {
       console.log(event.data);
       let newMsg = JSON.parse(event.data);
