@@ -2,7 +2,7 @@ Chatty-App is a simple, single page Chat app which allows users to communicated 
 
 ## Final Product
 
-!["Screenshot of Compose Tweet box"]()
+!["Screenshot of Compose Tweet box"](https://github.com/tyau1/Chatty-App/blob/master/chatty.png?raw=true)
 
 ### Getting Started
 Install the dependencies and start the server.
