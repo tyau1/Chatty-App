@@ -5,14 +5,14 @@ export default class MessageList extends Component {
 
   render() {
     let messages = this.props.messages.map((message) => {
-      return <Message key={message.id} messageProp={message}/>
+      return <Message key={message.id} messageProp={message} />
     });
     return (
       <div className='messages'>
-      {messages}
-      <div className='message system'>
+        {messages}
+        <div className='message system'>
+        </div>
       </div>
-    </div>
     )
   }
- }
+}

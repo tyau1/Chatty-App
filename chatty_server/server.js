@@ -1,30 +1,58 @@
-// server.js
-
 const express = require('express');
 const SocketServer = require('ws').Server;
+const WebSocket = require('ws');
+const uuidv1 = require('uuid/v1');
 
-
-// Set the port to 3001
 const PORT = 3001;
 
-// Create a new express server
-const server = express()
-   // Make the express server serve static assets (html, javascript, css) from the /public folder
-  .use(express.static('public'))
-  .listen(PORT, '0.0.0.0', 'localhost', () => console.log(`Listening on ${ PORT }`));
 
-// Create the WebSockets server
+const server = express()
+
+  .use(express.static('public'))
+  .listen(PORT, '0.0.0.0', 'localhost', () => console.log(`Listening on ${PORT}`));
+
 const wss = new SocketServer({ server });
 
-// Set up a callback that will run when a client connects to the server
-// When a client connects they are assigned a socket, represented by
-// the ws parameter in the callback.
+function updateNumberOfUSers(connection) {
+  const numberOfUsers = {
+    type: "info",
+    numberOfUsers: wss.clients.size
+  }
+
+  connection.forEach(function each(client) {
+    client.send(JSON.stringify(numberOfUsers));
+  });
+}
+
 wss.on('connection', (ws) => {
   console.log('Client connected');
-ws.on('message', function incoming(data) {
-  const { id, username, content } = JSON.parse(data);
-  console.log(`${username} said ${content}`);
-});
-  // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  console.log(`Number of clients connected: ${wss.clients.size}`);
+
+  updateNumberOfUSers(wss.clients);
+
+
+  ws.on('message', function incoming(data) {
+    let incomingMessage = JSON.parse(data);
+
+    if (incomingMessage.type === 'postMessage') {
+      incomingMessage.type = 'incomingMessage';
+
+    } else if (incomingMessage.type === 'postNotification') {
+      incomingMessage.type = 'incomingNotification';
+    }
+
+    incomingMessage["id"] = uuidv1();
+    wss.clients.forEach(function each(client) {
+
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(incomingMessage));
+      }
+    }
+    );
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+    updateNumberOfUSers(wss.clients)
+  })
 });
